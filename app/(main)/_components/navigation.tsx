@@ -6,10 +6,15 @@ import { clearModuleContext } from "next/dist/server/lib/render-server";
 import { usePathname } from "next/navigation";
 import { ElementRef, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
+import { UserItem } from "./user-item";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 const Navigation = () => {
   const pathname = usePathname();
   const isMobile = useMediaQuery("(max-width: 768px)");
+
+  const documents = useQuery(api.documents.get);
 
   const isResizingRef = useRef(false);
   const sidebarRef = useRef<ElementRef<"aside">>(null);
@@ -56,7 +61,7 @@ const Navigation = () => {
     if (sidebarRef.current && navbarRef.current) {
       sidebarRef.current.style.width = `${newWidth}px`;
       navbarRef.current.style.setProperty("left", `${newWidth}px`);
-      navbarRef.current.style.setProperty("width", `calc(100%-${newWidth}px)`);
+      // navbarRef.current.style.setProperty("width", `calc(100%-${newWidth}px)`);
     }
   };
 
@@ -70,12 +75,13 @@ const Navigation = () => {
     if (sidebarRef.current && navbarRef.current) {
       setIsCollapsed(false);
       setIsResetting(true);
+      console.log(isMobile);
       sidebarRef.current.style.width = isMobile ? "100%" : "240px";
-      navbarRef.current.style.setProperty(
-        "width",
-        isMobile ? "0" : "calc(100%-240px)"
-      );
-      navbarRef.current.style.setProperty("left", isMobile ? "100%" : "240px");
+      // navbarRef.current.style.setProperty(
+      //   "width",
+      //   isMobile ? "0" : "calc(100%-240px)"
+      // );
+      // navbarRef.current.style.setProperty("left", isMobile ? "100%" : "240px");
 
       setTimeout(() => {
         setIsResetting(false);
@@ -118,10 +124,12 @@ const Navigation = () => {
           <ChevronLeft className="h-6 w-6" />
         </div>
         <div>
-          <p>Action items</p>
+          <UserItem />
         </div>
         <div className="mt-4">
-          <p>Documents</p>
+          {documents?.map((document) => (
+            <p key={document._id}>{document.title}</p>
+          ))}
         </div>
 
         <div
